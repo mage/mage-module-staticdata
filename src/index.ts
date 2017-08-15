@@ -177,13 +177,14 @@ function extractMetaData(target: typeof StaticDataClass) {
  * @returns
  */
 async function walk(parent: string, data: any, Target: typeof StaticDataClass) {
+  // Return the received data if we are dealing with a literal
+  if (!Target) {
+    return data
+  }
+
   const instance = new (<any> Target)()
   const meta = Target._staticDataMeta
   const keys = Object.keys(meta)
-
-  if (!meta) {
-    throw new Error('Missing metadata!')
-  }
 
   for (const key of keys) {
     const keyMeta = meta[key]
@@ -405,11 +406,7 @@ export abstract class AbstractStaticDataModule {
    * @memberof AbstractStaticDataModule
    */
   public async import(_state: mage.core.IState, data: any): Promise<ValidationError| void> {
-    try {
-      this.staticData = await this.parse(data)
-    } catch (errors) {
-      return errors
-    }
+    this.staticData = await this.parse(data)
 
     await this.store(this.stringify(data))
   }
